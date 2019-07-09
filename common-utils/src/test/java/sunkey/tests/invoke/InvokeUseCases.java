@@ -1,13 +1,20 @@
-# common-utils 通用工具包
-> * 通用常量、接口、异常定义、状态枚举等
-> * MQ消息队列支持(ONS)
-> * 通用工具类:并发、异常、响应体、VOs、SpringBoot、JSON、Regex、Date、Network等
+package sunkey.tests.invoke;
 
+import com.aliyun.openservices.ons.api.ConsumeContext;
+import com.aliyun.openservices.ons.api.Message;
+import lombok.Getter;
+import lombok.Setter;
+import lombok.ToString;
+import org.springframework.core.annotation.Order;
+import sunkey.common.invoke.*;
 
-### Invoke 使用介绍
+import java.lang.reflect.Method;
+import java.nio.charset.StandardCharsets;
 
-```
-
+/**
+ * @author Sunkey
+ * @since 2019-07-09 17:02
+ **/
 public class InvokeUseCases {
 
     public static void main(String[] args) throws Exception {
@@ -76,45 +83,3 @@ public class InvokeUseCases {
     }
 
 }
-
-
-```
-
-### ONS 使用介绍
-
-```
-@SpringBootApplication
-@EnableOnsMessage
-public class MyApplication {
-    public static void main(String[] args){
-        SpringApplication.run(MyApplication.class, args);
-    }
-}
-
-@Component
-public class MyMqMessageHandler {
-    
-    @MessageListener(topic="${ons.order.topic}", tags="*")
-    public Action handleMyOrderMessage(String topic, 
-                                       String tag, 
-                                       String body, 
-                                       byte[] data, 
-                                       Message message, 
-                                       ConsumeContext context){
-        // do something...
-        return Action.CommitMessage;
-    }
-    
-    @MessageListener(topic="MyTopic", tags="MyTag1||MyTag2||MyTag3")
-    public void handleMyOrderMessage(Message message){
-        // do something...
-    }
-    
-    @MessageListener(topic="MyTopic")
-    public void handleMyOrderMessage(String data) throws Exception {
-        // do something...
-    }
-        
-}
-
-```
