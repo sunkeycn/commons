@@ -16,7 +16,7 @@ import java.lang.annotation.Target;
 @Import(OnsAutoConfiguration.class)
 public @interface EnableOnsMessage {
 
-    String groupId() default "GID-${spring.application.name}";
+    String groupId() default "${ons.groupId}";
 
     String accessKey() default "${ons.accessKey}";
 
