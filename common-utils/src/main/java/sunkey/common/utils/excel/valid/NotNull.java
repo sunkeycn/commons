@@ -11,7 +11,7 @@ import java.lang.annotation.Target;
  **/
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD})
-@Constraint(validator = NotNull.NotNullValidator.class)
+@Constraint(validator = NotNull.NotNullValidator.class, reusable = true)
 public @interface NotNull {
 
     class NotNullValidator implements ConstraintValidator<NotNull, Object> {
@@ -19,7 +19,6 @@ public @interface NotNull {
         @Override
         public void validate(Object value, NotNull anno, ValidContext context) {
             if (value == null) {
-
                 context.reportError("不能为空");
             }
         }

@@ -1,11 +1,9 @@
 package sunkey.common.utils.excel;
 
-import sunkey.common.utils.excel.support.*;
-import lombok.Getter;
-import lombok.Setter;
-import lombok.ToString;
+import lombok.*;
 import org.springframework.core.convert.ConversionService;
 import org.springframework.core.convert.support.DefaultConversionService;
+import sunkey.common.utils.excel.support.*;
 
 /**
  * @author Sunkey
@@ -14,9 +12,11 @@ import org.springframework.core.convert.support.DefaultConversionService;
 @Getter
 @Setter
 @ToString
+@RequiredArgsConstructor
 public class ReadConfiguration<T> {
 
-    private Class<T> dataType;
+    @NonNull
+    private final Class<T> dataType;
     /**
      * base on 0
      */
@@ -34,7 +34,7 @@ public class ReadConfiguration<T> {
      */
     private boolean autoValidate = true;
 
-    private ValueExtractor headerNameExtractor = DefaultValueExtractor.INSTANCE;
+    private StringValueExtractor headerNameExtractor = DefaultStringValueExtractor.INSTANCE;
 
     private ValueExtractor valueExtractor = DefaultValueExtractor.INSTANCE;
 
@@ -44,8 +44,14 @@ public class ReadConfiguration<T> {
 
     private ConversionService conversionService = new DefaultConversionService();
 
-    public ReadConfiguration<T> dataType(Class<T> type) {
-        this.dataType = type;
+    private Format format = Format.XLSX;
+
+    public Format format() {
+        return format;
+    }
+
+    public ReadConfiguration format(Format format) {
+        this.format = format;
         return this;
     }
 
@@ -69,7 +75,7 @@ public class ReadConfiguration<T> {
         return this;
     }
 
-    public ReadConfiguration<T> headerNameExtractor(ValueExtractor headerNameExtractor) {
+    public ReadConfiguration<T> headerNameExtractor(StringValueExtractor headerNameExtractor) {
         this.headerNameExtractor = headerNameExtractor;
         return this;
     }
@@ -100,7 +106,7 @@ public class ReadConfiguration<T> {
         return this;
     }
 
-    public Class<T> getDataType() {
+    public Class<T> dataType() {
         return dataType;
     }
 

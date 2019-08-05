@@ -13,7 +13,7 @@ import java.lang.annotation.Target;
  **/
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD})
-@Constraint(validator = Bool.BoolValidator.class)
+@Constraint(validator = Bool.BoolValidator.class, reusable = true)
 public @interface Bool {
 
     class BoolValidator implements ConstraintValidator<Bool, String> {

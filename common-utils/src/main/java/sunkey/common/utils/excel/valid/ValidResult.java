@@ -1,10 +1,10 @@
 package sunkey.common.utils.excel.valid;
 
-import sunkey.common.utils.excel.support.ErrorFormatter;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
+import sunkey.common.utils.excel.support.ErrorFormatter;
 
 import java.lang.annotation.Annotation;
 import java.util.*;
@@ -23,7 +23,7 @@ public class ValidResult {
 
     @Override
     public String toString() {
-        return errors.toString();
+        return errorMessages().toString();
     }
 
     public List<Error> errors() {

@@ -13,7 +13,7 @@ import java.lang.annotation.Target;
  **/
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD})
-@Constraint(validator = NotBlank.NotBlankValidator.class)
+@Constraint(validator = NotBlank.NotBlankValidator.class, reusable = true)
 public @interface NotBlank {
 
     class NotBlankValidator implements ConstraintValidator<NotBlank, Object> {

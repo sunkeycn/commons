@@ -1,14 +1,16 @@
 package sunkey.common.utils.excel.valid;
 
-import sunkey.common.utils.ReflectUtils;
-import sunkey.common.utils.excel.Headers;
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.ResolvableType;
+import sunkey.common.utils.Assert;
+import sunkey.common.utils.ReflectUtils;
+import sunkey.common.utils.excel.Headers;
 
 import java.lang.annotation.Annotation;
-import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -19,6 +21,8 @@ import java.util.Map;
  * @author Sunkey
  * @since 2019-06-11 17:17
  **/
+
+@Slf4j
 @Getter
 @Setter
 @ToString
@@ -79,15 +83,39 @@ public class ValidMeta {
         return meta;
     }
 
-    public static Map<Annotation, ConstraintValidator> findConstraintAnnotations(AnnotatedElement ae) {
+    public static Map<Annotation, ConstraintValidator> findConstraintAnnotations(Field field) {
         Map<Annotation, ConstraintValidator> result = new HashMap<>();
-        for (Annotation annotation : ae.getAnnotations()) {
-            Constraint anno = annotation.annotationType().getAnnotation(Constraint.class);
-            if (anno != null) {
-                result.put(annotation, Validator.getConstraintValidator(anno.validator()));
+        for (Annotation annotation : field.getAnnotations()) {
+            Class<? extends Annotation> annType = annotation.annotationType();
+            Constraint ann = annType.getAnnotation(Constraint.class);
+            if (ann != null) {
+                ConstraintValidator validator = Validator.getConstraintValidator(ann.validator(), ann.reusable());
+                try {
+                    validateTypes(validator, annType, field);
+                    result.put(annotation, validator);
+                } catch (Exception ex) {
+                    // Ignore type mismatch errors, don't add validator.
+                    log.error(ex.getMessage(), ex);
+                }
             }
         }
         return result;
+    }
+
+    private static void validateTypes(ConstraintValidator validator, Class annType, Field field) {
+        ResolvableType type = ResolvableType.forInstance(validator).as(ConstraintValidator.class);
+        Class<?> oAnnType = type.getGeneric(0).resolve();
+        Class<?> oValueType = type.getGeneric(1).resolve();
+        Assert.state(oAnnType == annType,
+                "annotation type mismatch on @" + annType.getSimpleName() + " " + toString(field));
+        Assert.state(oValueType.isAssignableFrom(field.getType()),
+                "value type mismatch on @" + annType.getSimpleName() + " " + toString(field));
+    }
+
+    private static String toString(Field field) {
+        if (field == null) return null;
+        return field.getDeclaringClass().getSimpleName() + "." +
+                field.getName() + "(" + field.getType().getSimpleName() + ")";
     }
 
 }

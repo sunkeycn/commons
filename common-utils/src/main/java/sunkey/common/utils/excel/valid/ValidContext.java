@@ -22,9 +22,9 @@ public class ValidContext {
     private int lineNo;
     private String fieldName;
 
-    public void reportError(String template) {
+    public void reportError(String message) {
         success = false;
-        result.addError(template, this);
+        result.addError(message, this);
     }
 
 }

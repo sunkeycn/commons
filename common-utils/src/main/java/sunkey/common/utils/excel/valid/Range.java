@@ -13,7 +13,7 @@ import java.lang.annotation.Target;
  **/
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD})
-@Constraint(validator = Range.RangeValidator.class)
+@Constraint(validator = Range.RangeValidator.class, reusable = true)
 public @interface Range {
 
     int min() default 0;

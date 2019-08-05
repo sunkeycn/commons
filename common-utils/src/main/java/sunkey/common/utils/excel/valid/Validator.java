@@ -11,14 +11,22 @@ public class Validator {
 
     private static final Map<Class, ConstraintValidator> instances = new HashMap<>();
 
-    public static <T extends ConstraintValidator> T getConstraintValidator(Class<T> type) {
-        return (T) instances.computeIfAbsent(type, ty -> {
+    public static <T extends ConstraintValidator> T getConstraintValidator(Class<T> type, boolean reusable) {
+        if (reusable) {
+            return (T) instances.computeIfAbsent(type, ty -> {
+                try {
+                    return (T) ty.newInstance();
+                } catch (Exception e) {
+                    throw new IllegalStateException(e.getMessage(), e);
+                }
+            });
+        } else {
             try {
-                return (T) ty.newInstance();
+                return type.newInstance();
             } catch (Exception e) {
                 throw new IllegalStateException(e.getMessage(), e);
             }
-        });
+        }
     }
 
     public static boolean needValidate(Class<?> type) {

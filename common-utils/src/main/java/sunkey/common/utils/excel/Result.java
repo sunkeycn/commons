@@ -1,9 +1,8 @@
 package sunkey.common.utils.excel;
 
-import sunkey.common.utils.excel.valid.ValidResult;
 import lombok.Getter;
 import lombok.Setter;
-import lombok.ToString;
+import sunkey.common.utils.excel.valid.ValidResult;
 
 import java.util.ArrayList;
 
@@ -13,7 +12,6 @@ import java.util.ArrayList;
  **/
 @Getter
 @Setter
-@ToString
 public class Result<T> extends ArrayList<T> {
 
     private ReadConfiguration<T> config;
@@ -31,4 +29,8 @@ public class Result<T> extends ArrayList<T> {
         return validResult.hasErrors();
     }
 
+    @Override
+    public String toString() {
+        return "Result[result=" + validResult.toString() + ", data=" + super.toString() + "]";
+    }
 }

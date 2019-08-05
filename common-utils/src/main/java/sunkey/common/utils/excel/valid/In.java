@@ -14,7 +14,7 @@ import java.util.Arrays;
  **/
 @Retention(RetentionPolicy.RUNTIME)
 @Target({ElementType.FIELD})
-@Constraint(validator = In.InValidator.class)
+@Constraint(validator = In.InValidator.class, reusable = true)
 public @interface In {
 
     String[] value();

@@ -1,6 +1,5 @@
 package sunkey.common.spring;
 
-import sunkey.common.utils.Assert;
 import lombok.Getter;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.BeansException;
@@ -16,6 +15,7 @@ import org.springframework.core.io.Resource;
 import org.springframework.util.StringUtils;
 import org.springframework.validation.BindException;
 import org.springframework.validation.Validator;
+import sunkey.common.utils.Assert;
 
 import java.io.IOException;
 import java.util.HashMap;
@@ -38,7 +38,7 @@ public class Spring implements ApplicationContextInitializer<ConfigurableApplica
     @Getter
     private static ConfigurableApplicationContext applicationContext;
 
-    public static boolean isLoaded(){
+    public static boolean isLoaded() {
         return loaded.get();
     }
 

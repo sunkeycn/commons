@@ -15,4 +15,6 @@ public @interface Constraint {
 
     Class<? extends ConstraintValidator> validator();
 
+    boolean reusable() default false;
+
 }

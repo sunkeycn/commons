@@ -1,11 +1,9 @@
 package sunkey.common.utils.excel;
 
+import lombok.*;
 import sunkey.common.utils.excel.support.NoneStyler;
 import sunkey.common.utils.excel.support.Styler;
 import sunkey.common.utils.excel.support.WorkbookProvider;
-import lombok.AllArgsConstructor;
-import lombok.Getter;
-import lombok.ToString;
 
 import java.util.List;
 
@@ -14,15 +12,19 @@ import java.util.List;
  * @since 2019-07-03 14:25
  **/
 
+@Getter
+@Setter
 @ToString
+@RequiredArgsConstructor
 public class WriteConfiguration<T> {
 
-    private WorkbookProvider provider = WorkbookProvider.HSSF;
+    @NonNull
+    private final Class<T> dataType;
+    private WorkbookProvider provider = WorkbookProvider.XSSF;
     private Styler headerStyler = NoneStyler.INSTANCE;
     private Styler dataStyler = NoneStyler.INSTANCE;
     private int headerRow = 0;
     private int dataStartRow = 1;
-    private Class<T> dataType = null;
 
     public Class<T> resolveDataType(List<T> list) {
         if (dataType != null) {
@@ -43,11 +45,6 @@ public class WriteConfiguration<T> {
         return dataType;
     }
 
-    public WriteConfiguration dataType(Class<T> dataType) {
-        this.dataType = dataType;
-        return this;
-    }
-
     public int headerRow() {
         return headerRow;
     }
@@ -66,8 +63,8 @@ public class WriteConfiguration<T> {
         return this;
     }
 
-    public WriteConfiguration writeType(Type writeType) {
-        this.provider = writeType.provider;
+    public WriteConfiguration format(Format format) {
+        this.provider = format.getProvider();
         return this;
     }
 
@@ -96,19 +93,6 @@ public class WriteConfiguration<T> {
     public WriteConfiguration dataStyler(Styler dataStyler) {
         this.dataStyler = dataStyler;
         return this;
-    }
-
-    @Getter
-    @AllArgsConstructor
-    public enum Type {
-
-        XLS(WorkbookProvider.HSSF),
-        XLSX(WorkbookProvider.XSSF),
-        XLSX_STREAM(WorkbookProvider.SXSSF),
-        ;
-
-        private final WorkbookProvider provider;
-
     }
 
 }

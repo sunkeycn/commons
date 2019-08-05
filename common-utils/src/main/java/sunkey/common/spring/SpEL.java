@@ -1,10 +1,12 @@
 package sunkey.common.spring;
 
-import org.springframework.context.expression.BeanFactoryResolver;
-import org.springframework.context.expression.MapAccessor;
+import org.springframework.context.expression.*;
+import org.springframework.core.convert.support.DefaultConversionService;
 import org.springframework.expression.spel.standard.SpelExpression;
 import org.springframework.expression.spel.standard.SpelExpressionParser;
 import org.springframework.expression.spel.support.StandardEvaluationContext;
+import org.springframework.expression.spel.support.StandardTypeConverter;
+import org.springframework.expression.spel.support.StandardTypeLocator;
 
 /**
  * @author Sunkey
@@ -18,8 +20,16 @@ public class SpEL {
     static {
         context = new StandardEvaluationContext();
         context.addPropertyAccessor(new MapAccessor());
+        context.addPropertyAccessor(new BeanExpressionContextAccessor());
+        context.addPropertyAccessor(new BeanFactoryAccessor());
+        context.addPropertyAccessor(new EnvironmentAccessor());
         if (Spring.isLoaded()) {
             context.setBeanResolver(new BeanFactoryResolver(Spring.getApplicationContext()));
+            context.setTypeLocator(new StandardTypeLocator(
+                    Spring.getApplicationContext().getBeanFactory().getBeanClassLoader()));
+            context.setTypeConverter(new StandardTypeConverter(Spring.getConversionService()));
+        } else {
+            context.setTypeConverter(new StandardTypeConverter(new DefaultConversionService()));
         }
     }
 

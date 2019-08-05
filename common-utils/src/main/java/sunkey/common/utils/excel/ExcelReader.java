@@ -1,17 +1,26 @@
 package sunkey.common.utils.excel;
 
-import sunkey.common.utils.excel.valid.ValidResult;
-import sunkey.common.utils.excel.valid.Validator;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
-import org.springframework.core.convert.ConversionFailedException;
+import org.apache.poi.ss.usermodel.Workbook;
 import org.springframework.core.convert.TypeDescriptor;
+import sunkey.common.utils.NumberUtils;
+import sunkey.common.utils.StringUtils;
+import sunkey.common.utils.excel.support.DefaultStringValueExtractor;
+import sunkey.common.utils.excel.valid.ValidResult;
+import sunkey.common.utils.excel.valid.Validator;
 
+import java.io.IOException;
+import java.io.InputStream;
+import java.text.DecimalFormat;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -27,6 +36,15 @@ public class ExcelReader<T> {
 
     public ExcelReader(ReadConfiguration<T> config) {
         this.config = config;
+    }
+
+    public Result<T> readToList(InputStream in) throws IOException {
+        return readToList(in, config.format());
+    }
+
+    public Result<T> readToList(InputStream in, Format format) throws IOException {
+        Workbook workbook = format.getProvider().createWorkbook(in);
+        return readToList(workbook.getSheetAt(0));
     }
 
     public Result<T> readToList(Sheet sheet) {
@@ -52,20 +70,66 @@ public class ExcelReader<T> {
         return result;
     }
 
+    private String formattedString(String format, Object val) {
+        if (val instanceof Date) {
+            return new SimpleDateFormat(format).format((Date) val);
+        }
+        if (val instanceof Number) {
+            return new DecimalFormat(format).format(val);
+        }
+        return null;
+    }
+
+    private Date formattedDate(String format, String val) throws ParseException {
+        return new SimpleDateFormat(format).parse(val);
+    }
+
+    private Object formattedNumber(String format, String val, Class requireType) throws ParseException {
+        Number parsedValue = new DecimalFormat(format).parse(val);
+        return NumberUtils.convertTo(parsedValue, requireType);
+    }
+
+    private Object convertValue(Header header, Object value) throws ParseException {
+        if (value == null) {
+            return null;
+        }
+        Class<?> type = header.getType();
+        if (type.isInstance(value)) {
+            return value;
+        }
+        if (StringUtils.hasText(header.getFormat())) {
+            if (type == Date.class && value instanceof String) {
+                return formattedDate(header.getFormat(), (String) value);
+            }
+            if (Number.class.isAssignableFrom(type)) {
+                return formattedNumber(header.getFormat(), value.toString(), type);
+            }
+            if (type == String.class) {
+                return formattedString(header.getFormat(), value);
+            }
+        }
+        // fallback
+        return config.getConversionService().convert(value,
+                TypeDescriptor.valueOf(value.getClass()),
+                TypeDescriptor.valueOf(type));
+    }
+
     private <T> T parseValue(Headers<T> headers, Row row, ValidResult result) {
         int cols = Math.min(headers.length(), row.getLastCellNum());
         T target = (T) config.getObjectFactory().createObject(config.getDataType());
         for (int i = 0; i < cols; i++) {
             Header header = headers.getHeader(i);
             if (header != null) {
-                String value = config.getValueExtractor().extractValue(row.getCell(i));
+                Object value = null;
                 try {
-                    Object convertedValue = config.getConversionService().convert(
-                            value,
-                            TypeDescriptor.valueOf(String.class),
-                            TypeDescriptor.valueOf(header.getType()));
+                    value = config.getValueExtractor().extractValue(header, row.getCell(i));
+                    Object convertedValue = convertValue(header, value);
                     header.setValue(target, convertedValue);
-                } catch (ConversionFailedException ex) {
+                } catch (Exception ex) {
+                    if (value == null) {
+                        // Value Fallback
+                        value = DefaultStringValueExtractor.INSTANCE.extractValue(row.getCell(i));
+                    }
                     result.addError(row.getRowNum(), header.getName(), "格式错误", value);
                 }
             }

@@ -1,7 +1,10 @@
 package sunkey.common.utils.excel.support;
 
 import org.apache.poi.ss.usermodel.Cell;
+import sunkey.common.utils.excel.Header;
 
 public interface ValueExtractor {
-    String extractValue(Cell cell);
+
+    Object extractValue(Header header, Cell cell);
+
 }

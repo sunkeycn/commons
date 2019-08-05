@@ -18,11 +18,16 @@ public class Header {
     private int index;
     private String name;
     private Field field;
+    private String format;
 
     public Header(int index, String name, Field field) {
         this.index = index;
         this.name = name;
         this.field = field;
+        ExcelField ann = field.getAnnotation(ExcelField.class);
+        if(ann != null){
+            this.format = ann.format();
+        }
         makeAccess();
     }
 
